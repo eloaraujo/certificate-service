@@ -1,0 +1,96 @@
+version: '3.8'
+services:
+  # Serviço da API
+  api:
+    build: ./api
+    container_name: certificate-service-api
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+      - redis
+      - rabbitmq
+    environment:
+      - RABBITMQ_URL=rabbitmq://rabbitmq:5672
+      - REDIS_URL=redis://redis:6379
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=certificado123
+      - DB_NAME=certificates
+    volumes:
+      - ./api:/usr/src/app
+    networks:
+      - app-network
+  
+
+  # Serviço Worker que processa a fila
+  worker:
+    build: ./worker
+    container_name: certificate-service-worker
+    depends_on:
+      - redis
+      - db
+      - rabbitmq
+    environment:
+      - RABBITMQ_URL=rabbitmq://rabbitmq:5672
+      - REDIS_URL=redis://redis:6379
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=certificado123
+      - DB_NAME=certificates
+    volumes:
+      - ./worker:/usr/src/app
+    networks:
+      - app-network
+
+
+  # Banco de Dados MySQL
+  db:
+    image: mysql:8.0
+    container_name: certificate-service-db
+    environment:
+      MYSQL_ROOT_PASSWORD: certificado123
+      MYSQL_DATABASE: certificados
+      MYSQL_USER: certificados
+      MYSQL_PASSWORD: certificado123
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - app-network
+
+  # RabbitMQ (Fila)
+  rabbitmq:
+    image: "rabbitmq:management"
+    container_name: certificate-service-rabbitmq
+    ports:
+       - "5672:5672"    # Porta padrão do RabbitMQ
+       - "15672:15672"  # Porta do painel de gerenciamento (web)
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - app-network
+
+  # Redis (Cache)
+  redis:
+    image: redis:alpine
+    container_name: certificate-service-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - app-network
+
+volumes:
+  db_data:
+    driver: local
+  rabbitmq_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge
