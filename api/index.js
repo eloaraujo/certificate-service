@@ -12,10 +12,10 @@ const port = process.env.PORT || 3000;
 
 // Configuração do banco de dados MySQL usando as variáveis de ambiente
 const db = mysql.createConnection({
-  host: certificate-service-db,
-  user: certificados,
-  password: certificado123,
-  database: certificados,
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
 });
 
 // Conectando ao banco de dados
@@ -57,13 +57,13 @@ function connectRabbitMQ() {
       const queue = 'gerar_certificado';
       channel.assertQueue(queue, { durable: true });
       console.log(`Aguardando mensagens na fila: ${queue}`);
-      
+
       channel.consume(queue, (msg) => {
         const diplomaData = JSON.parse(msg.content.toString());
         console.log("Mensagem recebida:", diplomaData);
-      
+
         gerarCertificado(diplomaData);
-      }, { noAck: true });      
+      }, { noAck: true });
     });
   });
 }
