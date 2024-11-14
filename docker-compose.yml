@@ -11,12 +11,12 @@ services:
       - redis
       - rabbitmq
     environment:
-      - RABBITMQ_URL=rabbitmq://rabbitmq:5672
+      - RABBITMQ_URL=amqp://rabbitmq:5672
       - REDIS_URL=redis://redis:6379
       - DB_HOST=db
       - DB_USER=root
       - DB_PASSWORD=certificado123
-      - DB_NAME=certificates
+      - DB_NAME=certificados
     volumes:
       - ./api:/usr/src/app
     networks:
@@ -32,12 +32,12 @@ services:
       - db
       - rabbitmq
     environment:
-      - RABBITMQ_URL=rabbitmq://rabbitmq:5672
+      - RABBITMQ_URL=amqp://rabbitmq:5672
       - REDIS_URL=redis://redis:6379
       - DB_HOST=db
       - DB_USER=root
       - DB_PASSWORD=certificado123
-      - DB_NAME=certificates
+      - DB_NAME=certificados
     volumes:
       - ./worker:/usr/src/app
     networks:
